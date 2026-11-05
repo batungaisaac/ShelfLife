@@ -42,6 +42,11 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         repository.update(item.copy(status = status, dateResolved = Date()))
     }
 
+    // Restores an item exactly as it was before it was marked (Active, no dateResolved).
+    fun undoMark(original: FoodItem) = viewModelScope.launch {
+        repository.update(original)
+    }
+
     // Temporary: seeds a few items so the lists have something to show
     // until the Add Item screen exists.
     fun insertSampleItemsIfEmpty() = viewModelScope.launch {

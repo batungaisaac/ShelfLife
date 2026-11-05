@@ -11,9 +11,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.shelflife.data.FoodItem
+import com.example.shelflife.data.ItemStatus
 
 @Composable
-fun HomeScreen(viewModel: FoodViewModel, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    viewModel: FoodViewModel,
+    onMark: (FoodItem, ItemStatus) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val items by viewModel.homeItems.collectAsStateWithLifecycle()
 
     if (items.isEmpty()) {
@@ -23,7 +29,7 @@ fun HomeScreen(viewModel: FoodViewModel, modifier: Modifier = Modifier) {
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         items(items, key = { it.id }) { item ->
-            SwipeableFoodItemRow(item, onMark = viewModel::markItem)
+            SwipeableFoodItemRow(item, onMark = onMark)
             HorizontalDivider()
         }
     }

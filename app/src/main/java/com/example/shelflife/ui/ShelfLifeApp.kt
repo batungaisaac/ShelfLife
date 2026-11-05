@@ -9,10 +9,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -20,6 +26,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.shelflife.data.FoodItem
+import com.example.shelflife.data.ItemStatus
+import kotlinx.coroutines.launch
 
 private enum class Screen(val route: String, val title: String, val icon: ImageVector) {
     Home("home", "Home", Icons.Filled.Home),
@@ -34,8 +43,28 @@ fun ShelfLifeApp(viewModel: FoodViewModel) {
     val currentRoute = backStackEntry?.destination?.route
     val current = Screen.entries.firstOrNull { it.route == currentRoute } ?: Screen.Home
 
+    // Snackbar lives at app level so it survives switching tabs.
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val onMark: (FoodItem, ItemStatus) -> Unit = { item, status ->
+        viewModel.markItem(item, status)
+        scope.launch {
+            // Replace any snackbar still showing instead of queueing behind it.
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val verb = if (status == ItemStatus.USED) "used" else "binned"
+            val result = snackbarHostState.showSnackbar(
+                message = "${item.name} marked as $verb",
+                actionLabel = "Undo",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) viewModel.undoMark(item)
+        }
+    }
+
     Scaffold(
         topBar = { TopAppBar(title = { Text(current.title) }) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             NavigationBar {
                 Screen.entries.forEach { screen ->
@@ -60,7 +89,7 @@ fun ShelfLifeApp(viewModel: FoodViewModel) {
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Home.route) { HomeScreen(viewModel) }
+            composable(Screen.Home.route) { HomeScreen(viewModel, onMark) }
             composable(Screen.ExpiringSoon.route) { ExpiringSoonScreen(viewModel) }
         }
     }
