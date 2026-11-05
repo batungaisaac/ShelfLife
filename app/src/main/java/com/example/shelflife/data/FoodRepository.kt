@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.Flow
 
 class FoodRepository(private val foodItemDao: FoodItemDao) {
 
+    val all: Flow<List<FoodItem>> = foodItemDao.getAll()
+
     val allActive: Flow<List<FoodItem>> = foodItemDao.getAllActive()
 
     fun expiringWithin(days: Int): Flow<List<FoodItem>> = foodItemDao.getExpiringWithin(days)
