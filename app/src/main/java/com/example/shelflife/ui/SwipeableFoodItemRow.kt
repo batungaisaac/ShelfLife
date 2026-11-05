@@ -34,13 +34,13 @@ fun SwipeableFoodItemRow(
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
 
+    // No reset needed: once marked, the item is no longer Active and leaves the list.
     LaunchedEffect(dismissState.currentValue) {
         when (dismissState.currentValue) {
             SwipeToDismissBoxValue.StartToEnd -> onMark(item, ItemStatus.USED)
             SwipeToDismissBoxValue.EndToStart -> onMark(item, ItemStatus.BINNED)
-            SwipeToDismissBoxValue.Settled -> return@LaunchedEffect
+            SwipeToDismissBoxValue.Settled -> {}
         }
-        dismissState.reset()
     }
 
     SwipeToDismissBox(
