@@ -23,7 +23,7 @@ fun HomeScreen(viewModel: FoodViewModel, modifier: Modifier = Modifier) {
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         items(items, key = { it.id }) { item ->
-            FoodItemRow(item)
+            SwipeableFoodItemRow(item, onMark = viewModel::markItem)
             HorizontalDivider()
         }
     }

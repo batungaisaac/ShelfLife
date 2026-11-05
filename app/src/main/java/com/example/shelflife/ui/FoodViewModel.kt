@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.shelflife.data.AppDatabase
 import com.example.shelflife.data.FoodItem
 import com.example.shelflife.data.FoodRepository
+import com.example.shelflife.data.ItemStatus
 import com.example.shelflife.data.StorageLocation
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,12 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
 
     fun insert(item: FoodItem) = viewModelScope.launch {
         repository.insert(item)
+    }
+
+    // Marks an item as used or binned. The row is kept (not deleted) so it can feed
+    // waste/usage stats later; dateResolved records when it left the kitchen.
+    fun markItem(item: FoodItem, status: ItemStatus) = viewModelScope.launch {
+        repository.update(item.copy(status = status, dateResolved = Date()))
     }
 
     // Temporary: seeds a few items so the lists have something to show

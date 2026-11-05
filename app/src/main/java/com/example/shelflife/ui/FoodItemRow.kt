@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.shelflife.data.FoodItem
+import com.example.shelflife.data.ItemStatus
 import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -34,9 +35,14 @@ fun FoodItemRow(item: FoodItem, modifier: Modifier = Modifier) {
             }
             val days = daysUntil(item.expiryDate)
             Text(
-                expiryLabel(days),
+                when (item.status) {
+                    ItemStatus.ACTIVE -> expiryLabel(days)
+                    ItemStatus.USED -> "Used"
+                    ItemStatus.BINNED -> "Binned"
+                },
                 style = MaterialTheme.typography.labelLarge,
                 color = when {
+                    item.status != ItemStatus.ACTIVE -> MaterialTheme.colorScheme.onSurfaceVariant
                     days < 0 -> MaterialTheme.colorScheme.error
                     days <= EXPIRING_SOON_DAYS -> Color(0xFFE65100)
                     else -> MaterialTheme.colorScheme.onSurfaceVariant
