@@ -23,6 +23,10 @@ interface ShoppingListDao {
     @Query("SELECT * FROM shopping_list_items ORDER BY isChecked ASC, name ASC")
     fun getAll(): Flow<List<ShoppingListItem>>
 
+    // How many unticked entries already have this name (case-insensitive).
+    @Query("SELECT COUNT(*) FROM shopping_list_items WHERE isChecked = 0 AND name = :name COLLATE NOCASE")
+    suspend fun countUnchecked(name: String): Int
+
     @Query("DELETE FROM shopping_list_items WHERE isChecked = 1")
     suspend fun deleteChecked()
 }

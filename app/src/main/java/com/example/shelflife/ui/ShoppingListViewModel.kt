@@ -26,6 +26,9 @@ class ShoppingListViewModel(application: Application) : AndroidViewModel(applica
         if (trimmed.isNotEmpty()) repository.insert(ShoppingListItem(name = trimmed))
     }
 
+    // True if the name is already on the list and not yet ticked off.
+    suspend fun isOnList(name: String): Boolean = repository.isOnList(name)
+
     fun setChecked(item: ShoppingListItem, checked: Boolean) = viewModelScope.launch {
         repository.update(item.copy(isChecked = checked))
     }
