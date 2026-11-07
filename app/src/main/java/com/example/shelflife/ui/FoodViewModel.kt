@@ -36,6 +36,13 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         repository.insert(item)
     }
 
+    suspend fun getItem(id: Long): FoodItem? = repository.getById(id)
+
+    // New items have id 0 (Room assigns one on insert); anything else is an edit.
+    fun save(item: FoodItem) = viewModelScope.launch {
+        if (item.id == 0L) repository.insert(item) else repository.update(item)
+    }
+
     // Marks an item as used or binned. The row is kept (not deleted) so it can feed
     // waste/usage stats later; dateResolved records when it left the kitchen.
     fun markItem(item: FoodItem, status: ItemStatus) = viewModelScope.launch {

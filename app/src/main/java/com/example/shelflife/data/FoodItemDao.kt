@@ -19,6 +19,9 @@ interface FoodItemDao {
     @Delete
     suspend fun delete(item: FoodItem)
 
+    @Query("SELECT * FROM food_items WHERE id = :id")
+    suspend fun getById(id: Long): FoodItem?
+
     @Query("SELECT * FROM food_items ORDER BY expiryDate ASC")
     fun getAll(): Flow<List<FoodItem>>
 

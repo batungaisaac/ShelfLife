@@ -30,7 +30,8 @@ private val BinnedColor = Color(0xFFC62828)
 fun SwipeableFoodItemRow(
     item: FoodItem,
     onMark: (FoodItem, ItemStatus) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
 
@@ -63,7 +64,7 @@ fun SwipeableFoodItemRow(
             }
         }
     ) {
-        FoodItemRow(item)
+        FoodItemRow(item, onClick = onClick)
     }
 }
 
