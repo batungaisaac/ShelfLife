@@ -26,7 +26,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -35,22 +38,30 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.shelflife.R
 import com.example.shelflife.data.FoodItem
 import com.example.shelflife.data.ItemStatus
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 // Tabs in the bottom bar. label is the short name under the icon, title goes in the top bar.
+// Each tab uses either a Material icon or a drawable resource.
 private enum class Screen(
     val route: String,
     val title: String,
-    val icon: ImageVector,
-    val label: String = title
+    val label: String = title,
+    val icon: ImageVector? = null,
+    val iconRes: Int? = null
 ) {
-    Home("home", "Home", Icons.Filled.Home),
-    ExpiringSoon("expiring_soon", "Expiring Soon", Icons.Filled.Warning, label = "Expiring"),
-    ShoppingList("shopping_list", "Shopping List", Icons.Filled.ShoppingCart, label = "Shopping")
+    Home("home", "Home", icon = Icons.Filled.Home),
+    ExpiringSoon("expiring_soon", "Expiring Soon", label = "Expiring", icon = Icons.Filled.Warning),
+    ShoppingList("shopping_list", "Shopping List", label = "Shopping", icon = Icons.Filled.ShoppingCart),
+    WasteStats("waste_stats", "Waste Stats", label = "Stats", iconRes = R.drawable.ic_stats)
 }
+
+@Composable
+private fun Screen.iconPainter(): Painter =
+    icon?.let { rememberVectorPainter(it) } ?: painterResource(iconRes!!)
 
 // Screens opened on top of a tab (no bottom bar, back arrow instead).
 private const val ADD_ITEM_ROUTE = "add_item"
@@ -61,7 +72,8 @@ private fun editItemRoute(id: Long) = "edit_item/$id"
 @Composable
 fun ShelfLifeApp(
     viewModel: FoodViewModel,
-    shoppingListViewModel: ShoppingListViewModel = viewModel()
+    shoppingListViewModel: ShoppingListViewModel = viewModel(),
+    wasteStatsViewModel: WasteStatsViewModel = viewModel()
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -156,7 +168,7 @@ fun ShelfLifeApp(
                                     restoreState = true
                                 }
                             },
-                            icon = { Icon(screen.icon, contentDescription = null) },
+                            icon = { Icon(screen.iconPainter(), contentDescription = null) },
                             label = { Text(screen.label) }
                         )
                     }
@@ -178,6 +190,7 @@ fun ShelfLifeApp(
             }
             composable(Screen.ExpiringSoon.route) { ExpiringSoonScreen(viewModel) }
             composable(Screen.ShoppingList.route) { ShoppingListScreen(shoppingListViewModel) }
+            composable(Screen.WasteStats.route) { WasteStatsScreen(wasteStatsViewModel) }
             composable(ADD_ITEM_ROUTE) {
                 AddItemScreen(viewModel, itemId = null, onDone = { navController.popBackStack() })
             }

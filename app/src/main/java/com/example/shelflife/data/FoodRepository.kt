@@ -1,6 +1,7 @@
 package com.example.shelflife.data
 
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 class FoodRepository(private val foodItemDao: FoodItemDao) {
 
@@ -11,6 +12,9 @@ class FoodRepository(private val foodItemDao: FoodItemDao) {
     fun expiringWithin(days: Int): Flow<List<FoodItem>> = foodItemDao.getExpiringWithin(days)
 
     fun byStatus(status: ItemStatus): Flow<List<FoodItem>> = foodItemDao.getByStatus(status)
+
+    fun countResolvedSince(status: ItemStatus, since: Date): Flow<Int> =
+        foodItemDao.countResolvedSince(status, since)
 
     fun search(query: String): Flow<List<FoodItem>> = foodItemDao.searchByName(query)
 
