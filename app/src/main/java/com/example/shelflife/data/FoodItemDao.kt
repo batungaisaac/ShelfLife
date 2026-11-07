@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 @Dao
 interface FoodItemDao {
@@ -42,6 +43,10 @@ interface FoodItemDao {
 
     @Query("SELECT * FROM food_items WHERE status = :status ORDER BY dateResolved DESC")
     fun getByStatus(status: ItemStatus): Flow<List<FoodItem>>
+
+    // Items marked with this status on or after the given date.
+    @Query("SELECT COUNT(*) FROM food_items WHERE status = :status AND dateResolved >= :since")
+    fun countResolvedSince(status: ItemStatus, since: Date): Flow<Int>
 
     @Query("SELECT * FROM food_items WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchByName(query: String): Flow<List<FoodItem>>
