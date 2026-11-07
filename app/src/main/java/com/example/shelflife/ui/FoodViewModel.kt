@@ -8,8 +8,11 @@ import com.example.shelflife.data.FoodItem
 import com.example.shelflife.data.FoodRepository
 import com.example.shelflife.data.ItemStatus
 import com.example.shelflife.data.StorageLocation
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -25,8 +28,19 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         AppDatabase.getDatabase(application).foodItemDao()
     )
 
+    // null means "All locations".
+    private val _locationFilter = MutableStateFlow<StorageLocation?>(null)
+    val locationFilter: StateFlow<StorageLocation?> = _locationFilter.asStateFlow()
+
+    fun setLocationFilter(location: StorageLocation?) {
+        _locationFilter.value = location
+    }
+
     // Used and binned items stay in the database but drop off these lists.
     val homeItems: StateFlow<List<FoodItem>> = repository.allActive
+        .combine(_locationFilter) { items, location ->
+            if (location == null) items else items.filter { it.location == location }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val expiringSoonItems: StateFlow<List<FoodItem>> = repository.expiringWithin(EXPIRING_SOON_DAYS)
