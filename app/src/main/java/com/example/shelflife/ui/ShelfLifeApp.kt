@@ -64,18 +64,35 @@ fun ShelfLifeApp(viewModel: FoodViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    val onMark: (FoodItem, ItemStatus) -> Unit = { item, status ->
-        viewModel.markItem(item, status)
+    // Shows a snackbar whose Undo puts the item back exactly as it was.
+    fun showUndo(message: String, original: FoodItem) {
         scope.launch {
             // Replace any snackbar still showing instead of queueing behind it.
             snackbarHostState.currentSnackbarData?.dismiss()
-            val verb = if (status == ItemStatus.USED) "used" else "binned"
             val result = snackbarHostState.showSnackbar(
-                message = "${item.name} marked as $verb",
+                message = message,
                 actionLabel = "Undo",
                 duration = SnackbarDuration.Short
             )
-            if (result == SnackbarResult.ActionPerformed) viewModel.undoMark(item)
+            if (result == SnackbarResult.ActionPerformed) viewModel.undoMark(original)
+        }
+    }
+
+    val onMark: (FoodItem, ItemStatus) -> Unit = { item, status ->
+        viewModel.markItem(item, status)
+        val verb = if (status == ItemStatus.USED) "used" else "binned"
+        showUndo("${item.name} marked as $verb", item)
+    }
+
+    // Using the last of an item marks it Used.
+    val onUseSome: (FoodItem, Double) -> Unit = { item, amount ->
+        val left = item.quantityRemaining - amount
+        if (left <= 0.0) {
+            viewModel.markItem(item, ItemStatus.USED, quantityRemaining = 0.0)
+            showUndo("${item.name} used up and marked as used", item)
+        } else {
+            viewModel.useSome(item, amount)
+            showUndo("Used ${formatQuantity(amount)} of ${item.name}, ${formatQuantity(left)} left", item)
         }
     }
 
@@ -144,7 +161,8 @@ fun ShelfLifeApp(viewModel: FoodViewModel) {
                 AddItemScreen(
                     viewModel,
                     itemId = entry.arguments?.getLong("itemId"),
-                    onDone = { navController.popBackStack() }
+                    onDone = { navController.popBackStack() },
+                    onUseSome = onUseSome
                 )
             }
         }

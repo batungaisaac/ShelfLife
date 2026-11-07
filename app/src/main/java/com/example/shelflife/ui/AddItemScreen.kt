@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -19,6 +20,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.shelflife.data.FoodItem
+import com.example.shelflife.data.ItemStatus
 import com.example.shelflife.data.StorageLocation
 import java.text.DateFormat
 import java.util.Calendar
@@ -49,7 +52,8 @@ fun AddItemScreen(
     viewModel: FoodViewModel,
     itemId: Long?,
     onDone: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onUseSome: ((FoodItem, Double) -> Unit)? = null
 ) {
     val isEdit = itemId != null
 
@@ -81,6 +85,7 @@ fun AddItemScreen(
     }
 
     var showDatePicker by remember { mutableStateOf(false) }
+    var showUseSome by remember { mutableStateOf(false) }
 
     val parsedQuantity = quantity.toDoubleOrNull()
     val parsedPrice = price.toDoubleOrNull()
@@ -110,6 +115,11 @@ fun AddItemScreen(
             label = { Text("Quantity") },
             singleLine = true,
             isError = quantity.isNotEmpty() && (parsedQuantity == null || parsedQuantity <= 0),
+            supportingText = original?.let { item ->
+                if (item.quantityRemaining != item.quantity) {
+                    { Text("${formatQuantity(item.quantityRemaining)} left") }
+                } else null
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth()
         )
@@ -189,6 +199,26 @@ fun AddItemScreen(
         ) {
             Text(if (isEdit) "Save changes" else "Add item")
         }
+
+        val current = original
+        if (onUseSome != null && current != null && current.status == ItemStatus.ACTIVE) {
+            OutlinedButton(onClick = { showUseSome = true }, modifier = Modifier.fillMaxWidth()) {
+                Text("Use some")
+            }
+        }
+    }
+
+    val current = original
+    if (showUseSome && current != null && onUseSome != null) {
+        UseSomeDialog(
+            item = current,
+            onConfirm = { amount ->
+                showUseSome = false
+                onUseSome(current, amount)
+                onDone()
+            },
+            onDismiss = { showUseSome = false }
+        )
     }
 
     if (showDatePicker) {
@@ -230,4 +260,44 @@ private fun localToUtcDate(localMillis: Long): Long {
         clear()
         set(local.get(Calendar.YEAR), local.get(Calendar.MONTH), local.get(Calendar.DAY_OF_MONTH))
     }.timeInMillis
+}
+
+// Asks how much of an item was used. Anything up to what's left is allowed;
+// using all of it marks the item Used.
+@Composable
+private fun UseSomeDialog(
+    item: FoodItem,
+    onConfirm: (Double) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var amount by rememberSaveable { mutableStateOf("") }
+    val parsed = amount.toDoubleOrNull()
+    val valid = parsed != null && parsed > 0 && parsed <= item.quantityRemaining
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Use some ${item.name}") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("${formatQuantity(item.quantityRemaining)} left")
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount used") },
+                    singleLine = true,
+                    isError = amount.isNotEmpty() && !valid,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
+                TextButton(onClick = { onConfirm(item.quantityRemaining) }) {
+                    Text("Used it all")
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { parsed?.let(onConfirm) }, enabled = valid) { Text("Use") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
 }
