@@ -8,12 +8,15 @@ import com.example.shelflife.data.FoodItem
 import com.example.shelflife.data.FoodRepository
 import com.example.shelflife.data.ItemStatus
 import com.example.shelflife.data.StorageLocation
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -22,6 +25,7 @@ import java.util.concurrent.TimeUnit
 // Items expiring within this many days show up on the Expiring Soon screen.
 const val EXPIRING_SOON_DAYS = 3
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class FoodViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = FoodRepository(
@@ -36,8 +40,21 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         _locationFilter.value = location
     }
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
+    // Blank search shows everything; otherwise the DAO's name search, kept to Active items.
+    private val activeMatchingSearch = _searchQuery.flatMapLatest { query ->
+        if (query.isBlank()) repository.allActive
+        else repository.search(query.trim()).map { items -> items.filter { it.status == ItemStatus.ACTIVE } }
+    }
+
     // Used and binned items stay in the database but drop off these lists.
-    val homeItems: StateFlow<List<FoodItem>> = repository.allActive
+    val homeItems: StateFlow<List<FoodItem>> = activeMatchingSearch
         .combine(_locationFilter) { items, location ->
             if (location == null) items else items.filter { it.location == location }
         }
