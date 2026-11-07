@@ -18,6 +18,7 @@ import com.example.shelflife.data.ItemStatus
 fun HomeScreen(
     viewModel: FoodViewModel,
     onMark: (FoodItem, ItemStatus) -> Unit,
+    onItemClick: (FoodItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val items by viewModel.homeItems.collectAsStateWithLifecycle()
@@ -29,7 +30,7 @@ fun HomeScreen(
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         items(items, key = { it.id }) { item ->
-            SwipeableFoodItemRow(item, onMark = onMark)
+            SwipeableFoodItemRow(item, onMark = onMark, onClick = { onItemClick(item) })
             HorizontalDivider()
         }
     }

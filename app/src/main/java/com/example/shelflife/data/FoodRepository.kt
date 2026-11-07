@@ -14,6 +14,8 @@ class FoodRepository(private val foodItemDao: FoodItemDao) {
 
     fun search(query: String): Flow<List<FoodItem>> = foodItemDao.searchByName(query)
 
+    suspend fun getById(id: Long): FoodItem? = foodItemDao.getById(id)
+
     suspend fun insert(item: FoodItem): Long = foodItemDao.insert(item)
 
     suspend fun update(item: FoodItem) = foodItemDao.update(item)

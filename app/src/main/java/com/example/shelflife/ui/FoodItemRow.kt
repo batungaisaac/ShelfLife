@@ -1,5 +1,6 @@
 package com.example.shelflife.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,8 +20,16 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 @Composable
-fun FoodItemRow(item: FoodItem, modifier: Modifier = Modifier) {
-    Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
+fun FoodItemRow(
+    item: FoodItem,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    val clickModifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+    Surface(
+        modifier = modifier.fillMaxWidth().then(clickModifier),
+        color = MaterialTheme.colorScheme.surface
+    ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -71,8 +80,8 @@ private fun expiryLabel(days: Long): String = when {
     else -> "$days days left"
 }
 
-private fun formatQuantity(q: Double): String =
+fun formatQuantity(q: Double): String =
     if (q % 1.0 == 0.0) q.toLong().toString() else q.toString()
 
-private fun com.example.shelflife.data.StorageLocation.label(): String =
+fun com.example.shelflife.data.StorageLocation.label(): String =
     name.lowercase().replaceFirstChar { it.uppercase() }
