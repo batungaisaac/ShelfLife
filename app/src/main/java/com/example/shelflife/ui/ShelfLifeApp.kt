@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -36,6 +37,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.shelflife.data.FoodItem
 import com.example.shelflife.data.ItemStatus
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 // Tabs in the bottom bar. label is the short name under the icon, title goes in the top bar.
@@ -74,25 +76,38 @@ fun ShelfLifeApp(
     // Snackbar lives at app level so it survives switching tabs.
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val snackbarJob = remember { mutableStateOf<Job?>(null) }
 
-    // Shows a snackbar whose Undo puts the item back exactly as it was.
-    fun showUndo(message: String, original: FoodItem) {
-        scope.launch {
-            // Replace any snackbar still showing instead of queueing behind it.
-            snackbarHostState.currentSnackbarData?.dismiss()
+    // Shows a snackbar whose Undo puts the item back exactly as it was. If the item was
+    // marked Used and not undone, follows up by offering to add it to the Shopping List.
+    fun showUndo(message: String, original: FoodItem, offerShoppingList: Boolean = false) {
+        // Cancelling the previous job replaces its snackbar (and skips its offer)
+        // instead of queueing behind it.
+        snackbarJob.value?.cancel()
+        snackbarJob.value = scope.launch {
             val result = snackbarHostState.showSnackbar(
                 message = message,
                 actionLabel = "Undo",
                 duration = SnackbarDuration.Short
             )
-            if (result == SnackbarResult.ActionPerformed) viewModel.undoMark(original)
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.undoMark(original)
+                return@launch
+            }
+            if (!offerShoppingList || shoppingListViewModel.isOnList(original.name)) return@launch
+            val add = snackbarHostState.showSnackbar(
+                message = "Add ${original.name} to your shopping list?",
+                actionLabel = "Add",
+                duration = SnackbarDuration.Short
+            )
+            if (add == SnackbarResult.ActionPerformed) shoppingListViewModel.add(original.name)
         }
     }
 
     val onMark: (FoodItem, ItemStatus) -> Unit = { item, status ->
         viewModel.markItem(item, status)
         val verb = if (status == ItemStatus.USED) "used" else "binned"
-        showUndo("${item.name} marked as $verb", item)
+        showUndo("${item.name} marked as $verb", item, offerShoppingList = status == ItemStatus.USED)
     }
 
     // Using the last of an item marks it Used.
@@ -100,7 +115,7 @@ fun ShelfLifeApp(
         val left = item.quantityRemaining - amount
         if (left <= 0.0) {
             viewModel.markItem(item, ItemStatus.USED, quantityRemaining = 0.0)
-            showUndo("${item.name} used up and marked as used", item)
+            showUndo("${item.name} used up and marked as used", item, offerShoppingList = true)
         } else {
             viewModel.useSome(item, amount)
             showUndo("Used ${formatQuantity(amount)} of ${item.name}, ${formatQuantity(left)} left", item)

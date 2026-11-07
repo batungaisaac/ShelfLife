@@ -10,5 +10,7 @@ class ShoppingListRepository(private val shoppingListDao: ShoppingListDao) {
 
     suspend fun update(item: ShoppingListItem) = shoppingListDao.update(item)
 
+    suspend fun isOnList(name: String): Boolean = shoppingListDao.countUnchecked(name.trim()) > 0
+
     suspend fun deleteChecked() = shoppingListDao.deleteChecked()
 }
