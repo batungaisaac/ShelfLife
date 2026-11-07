@@ -76,8 +76,19 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
 
     // Marks an item as used or binned. The row is kept (not deleted) so it can feed
     // waste/usage stats later; dateResolved records when it left the kitchen.
-    fun markItem(item: FoodItem, status: ItemStatus) = viewModelScope.launch {
-        repository.update(item.copy(status = status, dateResolved = Date()))
+    fun markItem(
+        item: FoodItem,
+        status: ItemStatus,
+        quantityRemaining: Double = item.quantityRemaining
+    ) = viewModelScope.launch {
+        repository.update(
+            item.copy(status = status, dateResolved = Date(), quantityRemaining = quantityRemaining)
+        )
+    }
+
+    // Lowers what's left of an item. Using the last of it goes through markItem instead.
+    fun useSome(item: FoodItem, amount: Double) = viewModelScope.launch {
+        repository.update(item.copy(quantityRemaining = item.quantityRemaining - amount))
     }
 
     // Restores an item exactly as it was before it was marked (Active, no dateResolved).
