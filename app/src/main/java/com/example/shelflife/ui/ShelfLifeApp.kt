@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -36,10 +38,16 @@ import com.example.shelflife.data.FoodItem
 import com.example.shelflife.data.ItemStatus
 import kotlinx.coroutines.launch
 
-// Tabs in the bottom bar.
-private enum class Screen(val route: String, val title: String, val icon: ImageVector) {
+// Tabs in the bottom bar. label is the short name under the icon, title goes in the top bar.
+private enum class Screen(
+    val route: String,
+    val title: String,
+    val icon: ImageVector,
+    val label: String = title
+) {
     Home("home", "Home", Icons.Filled.Home),
-    ExpiringSoon("expiring_soon", "Expiring Soon", Icons.Filled.Warning)
+    ExpiringSoon("expiring_soon", "Expiring Soon", Icons.Filled.Warning, label = "Expiring"),
+    ShoppingList("shopping_list", "Shopping List", Icons.Filled.ShoppingCart, label = "Shopping")
 }
 
 // Screens opened on top of a tab (no bottom bar, back arrow instead).
@@ -49,7 +57,10 @@ private fun editItemRoute(id: Long) = "edit_item/$id"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShelfLifeApp(viewModel: FoodViewModel) {
+fun ShelfLifeApp(
+    viewModel: FoodViewModel,
+    shoppingListViewModel: ShoppingListViewModel = viewModel()
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -131,7 +142,7 @@ fun ShelfLifeApp(viewModel: FoodViewModel) {
                                 }
                             },
                             icon = { Icon(screen.icon, contentDescription = null) },
-                            label = { Text(screen.title) }
+                            label = { Text(screen.label) }
                         )
                     }
                 }
@@ -151,6 +162,7 @@ fun ShelfLifeApp(viewModel: FoodViewModel) {
                 )
             }
             composable(Screen.ExpiringSoon.route) { ExpiringSoonScreen(viewModel) }
+            composable(Screen.ShoppingList.route) { ShoppingListScreen(shoppingListViewModel) }
             composable(ADD_ITEM_ROUTE) {
                 AddItemScreen(viewModel, itemId = null, onDone = { navController.popBackStack() })
             }

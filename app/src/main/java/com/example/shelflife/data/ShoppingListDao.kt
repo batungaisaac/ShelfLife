@@ -22,4 +22,7 @@ interface ShoppingListDao {
     // Unchecked items first
     @Query("SELECT * FROM shopping_list_items ORDER BY isChecked ASC, name ASC")
     fun getAll(): Flow<List<ShoppingListItem>>
+
+    @Query("DELETE FROM shopping_list_items WHERE isChecked = 1")
+    suspend fun deleteChecked()
 }
