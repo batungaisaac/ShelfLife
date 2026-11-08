@@ -11,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -20,6 +21,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +43,8 @@ import androidx.navigation.navArgument
 import com.example.shelflife.R
 import com.example.shelflife.data.FoodItem
 import com.example.shelflife.data.ItemStatus
+import com.example.shelflife.ui.theme.Navy
+import com.example.shelflife.ui.theme.White
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -144,13 +148,24 @@ fun ShelfLifeApp(
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
-                }
+                },
+                // Navy bar with white title and icons, in light and dark mode.
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Navy,
+                    titleContentColor = White,
+                    navigationIconContentColor = White
+                )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (currentTab == Screen.Home) {
-                FloatingActionButton(onClick = { navController.navigate(ADD_ITEM_ROUTE) }) {
+                // Pink is the contrast colour, so the main action stands out.
+                FloatingActionButton(
+                    onClick = { navController.navigate(ADD_ITEM_ROUTE) },
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ) {
                     Icon(Icons.Filled.Add, contentDescription = "Add item")
                 }
             }
