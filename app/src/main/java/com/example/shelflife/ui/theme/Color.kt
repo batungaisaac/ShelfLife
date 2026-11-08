@@ -2,10 +2,23 @@ package com.example.shelflife.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// ShelfLife palette: navy as the main colour, white backgrounds, pink as the contrast/accent.
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Navy
+val Navy = Color(0xFF1B2A49)
+val NavyDark = Color(0xFF111B30)
+val NavyLight = Color(0xFFDCE3F4)
+val NavySoft = Color(0xFFAFC0E6)
+
+// Pink (contrast)
+val Pink = Color(0xFFE5487D)
+val PinkLight = Color(0xFFFFD9E3)
+val PinkDeep = Color(0xFF5C1131)
+val PinkSoft = Color(0xFFFFB0C8)
+
+// Whites and greys
+val White = Color(0xFFFFFFFF)
+val OffWhite = Color(0xFFF5F7FB)
+val CoolGrey = Color(0xFFE6EAF2)
+val Slate = Color(0xFF4A5368)
+val Ink = Color(0xFF151A26)

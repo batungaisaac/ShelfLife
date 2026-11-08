@@ -1,7 +1,9 @@
 package com.example.shelflife
 
 import android.os.Bundle
+import android.graphics.Color
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -19,7 +21,8 @@ class MainActivity : ComponentActivity() {
         // Temporary until the Add Item screen exists.
         viewModel.insertSampleItemsIfEmpty()
 
-        enableEdgeToEdge()
+        // The top bar is always navy, so keep the status bar icons white.
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
         setContent {
             ShelfLifeTheme {
                 ShelfLifeApp(viewModel)
