@@ -96,16 +96,17 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         repository.update(original)
     }
 
-    // Temporary: seeds a few items so the lists have something to show
-    // until the Add Item screen exists.
+    // Seeds demo items on first launch so every expiry state shows up on Home:
+    // expired, today, tomorrow, soon, and plenty of time left, across all three locations.
     fun insertSampleItemsIfEmpty() = viewModelScope.launch {
         if (repository.all.first().isNotEmpty()) return@launch
         val now = System.currentTimeMillis()
         fun inDays(days: Int) = Date(now + TimeUnit.DAYS.toMillis(days.toLong()))
         listOf(
-            FoodItem(name = "Milk", quantity = 1.0, location = StorageLocation.FRIDGE, expiryDate = inDays(2), price = 120.0),
-            FoodItem(name = "Spinach", quantity = 1.0, location = StorageLocation.FRIDGE, expiryDate = inDays(-1), price = 50.0),
-            FoodItem(name = "Eggs", quantity = 12.0, location = StorageLocation.FRIDGE, expiryDate = inDays(10), price = 420.0),
+            FoodItem(name = "Milk", quantity = 1.0, location = StorageLocation.FRIDGE, expiryDate = inDays(0), price = 120.0),
+            FoodItem(name = "Yoghurt", quantity = 4.0, location = StorageLocation.FRIDGE, expiryDate = inDays(1), price = 200.0),
+            FoodItem(name = "Spinach", quantity = 1.0, location = StorageLocation.FRIDGE, expiryDate = inDays(-2), price = 50.0),
+            FoodItem(name = "Bread", quantity = 1.0, location = StorageLocation.CUPBOARD, expiryDate = inDays(3), price = 65.0),
             FoodItem(name = "Frozen peas", quantity = 1.0, location = StorageLocation.FREEZER, expiryDate = inDays(90), price = 250.0),
             FoodItem(name = "Rice", quantity = 2.0, location = StorageLocation.CUPBOARD, expiryDate = inDays(180), price = 300.0)
         ).forEach { repository.insert(it) }
