@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Temporary until the Add Item screen exists.
+        // Demo items on first launch, so the lists aren't empty.
         viewModel.insertSampleItemsIfEmpty()
 
         // The top bar is always navy, so keep the status bar icons white.
