@@ -22,6 +22,8 @@ class ShakeDetector(
     var lastForce = 0f
         private set
 
+    private var lastShakeTime = 0L
+
     fun start() {
         // Some emulators and cheap phones have no accelerometer
         accelerometer ?: return
@@ -39,9 +41,15 @@ class ShakeDetector(
 
         lastForce = sqrt(x * x + y * y + z * z)
 
-        if (lastForce > SHAKE_THRESHOLD) {
-            onShake()
-        }
+        if (lastForce < SHAKE_THRESHOLD) return
+
+        // One shake gives a burst of readings over the threshold,
+        // so ignore anything that comes in right after the last one
+        val now = System.currentTimeMillis()
+        if (now - lastShakeTime < SHAKE_COOLDOWN_MS) return
+
+        lastShakeTime = now
+        onShake()
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -51,5 +59,6 @@ class ShakeDetector(
     companion object {
         // 2.7g is a common starting point. Much lower and just picking the phone up sets it off
         private const val SHAKE_THRESHOLD = 2.7f
+        private const val SHAKE_COOLDOWN_MS = 500L
     }
 }
