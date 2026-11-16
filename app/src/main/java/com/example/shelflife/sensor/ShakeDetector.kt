@@ -8,7 +8,10 @@ import android.hardware.SensorManager
 import kotlin.math.sqrt
 
 // Listens to the accelerometer. Not hooked up to any screen yet.
-class ShakeDetector(context: Context) : SensorEventListener {
+class ShakeDetector(
+    context: Context,
+    private val onShake: () -> Unit
+) : SensorEventListener {
 
     private val sensorManager =
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -35,9 +38,18 @@ class ShakeDetector(context: Context) : SensorEventListener {
         val z = event.values[2] / SensorManager.GRAVITY_EARTH
 
         lastForce = sqrt(x * x + y * y + z * z)
+
+        if (lastForce > SHAKE_THRESHOLD) {
+            onShake()
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // don't need this
+    }
+
+    companion object {
+        // 2.7g is a common starting point. Much lower and just picking the phone up sets it off
+        private const val SHAKE_THRESHOLD = 2.7f
     }
 }
