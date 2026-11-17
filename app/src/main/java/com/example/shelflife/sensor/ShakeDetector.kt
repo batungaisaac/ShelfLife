@@ -5,13 +5,16 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import kotlin.math.sqrt
 
-// Listens to the accelerometer. Not hooked up to any screen yet.
+// Listens to the accelerometer. Add it as a lifecycle observer and it
+// only runs while the screen is in the foreground.
 class ShakeDetector(
     context: Context,
     private val onShake: () -> Unit
-) : SensorEventListener {
+) : SensorEventListener, DefaultLifecycleObserver {
 
     private val sensorManager =
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -33,6 +36,11 @@ class ShakeDetector(
     fun stop() {
         sensorManager.unregisterListener(this)
     }
+
+    override fun onResume(owner: LifecycleOwner) = start()
+
+    // No point reading the sensor when nobody can see the app
+    override fun onPause(owner: LifecycleOwner) = stop()
 
     override fun onSensorChanged(event: SensorEvent) {
         val x = event.values[0] / SensorManager.GRAVITY_EARTH
