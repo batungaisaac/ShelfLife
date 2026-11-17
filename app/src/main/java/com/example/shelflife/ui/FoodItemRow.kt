@@ -80,8 +80,11 @@ private fun expiryLabel(days: Long): String = when {
     else -> "$days days left"
 }
 
-fun formatQuantity(q: Double): String =
-    if (q % 1.0 == 0.0) q.toLong().toString() else q.toString()
+fun formatQuantity(q: Double): String {
+    // Taking 0.7 off 1 gives 0.30000000000000004, so round before showing it
+    val rounded = Math.round(q * 100) / 100.0
+    return if (rounded % 1.0 == 0.0) rounded.toLong().toString() else rounded.toString()
+}
 
 fun com.example.shelflife.data.StorageLocation.label(): String =
     name.lowercase().replaceFirstChar { it.uppercase() }
