@@ -11,10 +11,14 @@ import com.example.shelflife.sensor.ShakeDetector
 import com.example.shelflife.ui.FoodViewModel
 import com.example.shelflife.ui.ShelfLifeApp
 import com.example.shelflife.ui.theme.ShelfLifeTheme
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: FoodViewModel by viewModels()
+
+    // Gets one event per shake, passed down to the app below.
+    private val shakes = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,15 +28,14 @@ class MainActivity : ComponentActivity() {
 
         // Starts on resume and stops on pause, so the sensor isn't
         // draining the battery while the app is in the background.
-        // A shake doesn't do anything yet.
-        val shakeDetector = ShakeDetector(this, onShake = {})
+        val shakeDetector = ShakeDetector(this, onShake = { shakes.tryEmit(Unit) })
         lifecycle.addObserver(shakeDetector)
 
         // The top bar is always navy, so keep the status bar icons white.
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
         setContent {
             ShelfLifeTheme {
-                ShelfLifeApp(viewModel)
+                ShelfLifeApp(viewModel, shakes = shakes)
             }
         }
     }

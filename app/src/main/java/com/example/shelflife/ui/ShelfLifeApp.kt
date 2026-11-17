@@ -47,6 +47,8 @@ import com.example.shelflife.data.ItemStatus
 import com.example.shelflife.ui.theme.Navy
 import com.example.shelflife.ui.theme.White
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 
 // Tabs in the bottom bar. label is the short name under the icon, title goes in the top bar.
@@ -87,6 +89,7 @@ private fun NavController.navigateToTab(screen: Screen) {
 @Composable
 fun ShelfLifeApp(
     viewModel: FoodViewModel,
+    shakes: Flow<Unit> = emptyFlow(),
     shoppingListViewModel: ShoppingListViewModel = viewModel(),
     wasteStatsViewModel: WasteStatsViewModel = viewModel()
 ) {
