@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -71,6 +72,16 @@ private fun Screen.iconPainter(): Painter =
 private const val ADD_ITEM_ROUTE = "add_item"
 private const val EDIT_ITEM_ROUTE = "edit_item/{itemId}"
 private fun editItemRoute(id: Long) = "edit_item/$id"
+
+// Keeps one copy of each tab on the back stack, and each tab remembers
+// where you were when you come back to it.
+private fun NavController.navigateToTab(screen: Screen) {
+    navigate(screen.route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,13 +187,7 @@ fun ShelfLifeApp(
                     Screen.entries.forEach { screen ->
                         NavigationBarItem(
                             selected = screen == currentTab,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
+                            onClick = { navController.navigateToTab(screen) },
                             icon = { Icon(screen.iconPainter(), contentDescription = null) },
                             label = { Text(screen.label) }
                         )
