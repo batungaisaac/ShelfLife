@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -101,6 +102,11 @@ fun ShelfLifeApp(
         ADD_ITEM_ROUTE -> "Add Item"
         EDIT_ITEM_ROUTE -> "Edit Item"
         else -> (currentTab ?: Screen.Home).title
+    }
+
+    // Shaking the phone jumps to Expiring Soon from anywhere.
+    LaunchedEffect(shakes) {
+        shakes.collect { navController.navigateToTab(Screen.ExpiringSoon) }
     }
 
     // Snackbar lives at app level so it survives switching tabs.
