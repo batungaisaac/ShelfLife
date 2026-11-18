@@ -48,6 +48,7 @@ interface FoodItemDao {
     @Query("SELECT COUNT(*) FROM food_items WHERE status = :status AND dateResolved >= :since")
     fun countResolvedSince(status: ItemStatus, since: Date): Flow<Int>
 
-    @Query("SELECT * FROM food_items WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
+    // Same order as the full list, so searching doesn't reshuffle Home.
+    @Query("SELECT * FROM food_items WHERE name LIKE '%' || :query || '%' ORDER BY expiryDate ASC")
     fun searchByName(query: String): Flow<List<FoodItem>>
 }

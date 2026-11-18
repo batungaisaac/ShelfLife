@@ -21,6 +21,10 @@ class ShakeDetector(
     private val accelerometer: Sensor? =
         sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
+    // False on some emulators and cheap phones, which have no accelerometer
+    val isAvailable: Boolean
+        get() = accelerometer != null
+
     // Last force we read, in g. Resting on a table this sits around 1.0
     var lastForce = 0f
         private set
@@ -28,7 +32,6 @@ class ShakeDetector(
     private var lastShakeTime = 0L
 
     fun start() {
-        // Some emulators and cheap phones have no accelerometer
         accelerometer ?: return
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
     }

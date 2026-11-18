@@ -29,7 +29,8 @@ class MainActivity : ComponentActivity() {
         // Starts on resume and stops on pause, so the sensor isn't
         // draining the battery while the app is in the background.
         val shakeDetector = ShakeDetector(this, onShake = { shakes.tryEmit(Unit) })
-        lifecycle.addObserver(shakeDetector)
+        // No accelerometer means no shake shortcut, the rest of the app works the same.
+        if (shakeDetector.isAvailable) lifecycle.addObserver(shakeDetector)
 
         // The top bar is always navy, so keep the status bar icons white.
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))

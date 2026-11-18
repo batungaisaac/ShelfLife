@@ -8,9 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.shelflife.data.FoodItem
 
 @Composable
-fun ExpiringSoonScreen(viewModel: FoodViewModel, modifier: Modifier = Modifier) {
+fun ExpiringSoonScreen(
+    viewModel: FoodViewModel,
+    onItemClick: (FoodItem) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val items by viewModel.expiringSoonItems.collectAsStateWithLifecycle()
 
     if (items.isEmpty()) {
@@ -20,7 +25,7 @@ fun ExpiringSoonScreen(viewModel: FoodViewModel, modifier: Modifier = Modifier) 
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         items(items, key = { it.id }) { item ->
-            FoodItemRow(item)
+            FoodItemRow(item, onClick = { onItemClick(item) })
             HorizontalDivider()
         }
     }

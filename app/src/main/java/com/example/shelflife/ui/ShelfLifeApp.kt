@@ -217,7 +217,12 @@ fun ShelfLifeApp(
                     onItemClick = { navController.navigate(editItemRoute(it.id)) }
                 )
             }
-            composable(Screen.ExpiringSoon.route) { ExpiringSoonScreen(viewModel) }
+            composable(Screen.ExpiringSoon.route) {
+                ExpiringSoonScreen(
+                    viewModel,
+                    onItemClick = { navController.navigate(editItemRoute(it.id)) }
+                )
+            }
             composable(Screen.ShoppingList.route) { ShoppingListScreen(shoppingListViewModel) }
             composable(Screen.WasteStats.route) { WasteStatsScreen(wasteStatsViewModel) }
             composable(ADD_ITEM_ROUTE) {
