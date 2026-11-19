@@ -1,10 +1,12 @@
 package com.example.shelflife.ui
 
+import android.content.Intent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -41,6 +44,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.shelflife.R
+import com.example.shelflife.SettingsActivity
 import com.example.shelflife.data.FoodItem
 import com.example.shelflife.data.ItemStatus
 import com.example.shelflife.ui.theme.Navy
@@ -138,6 +142,8 @@ fun ShelfLifeApp(
         }
     }
 
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -149,11 +155,19 @@ fun ShelfLifeApp(
                         }
                     }
                 },
+                actions = {
+                    IconButton(onClick = {
+                        context.startActivity(Intent(context, SettingsActivity::class.java))
+                    }) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                },
                 // Navy bar with white title and icons, in light and dark mode.
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Navy,
                     titleContentColor = White,
-                    navigationIconContentColor = White
+                    navigationIconContentColor = White,
+                    actionIconContentColor = White
                 )
             )
         },
