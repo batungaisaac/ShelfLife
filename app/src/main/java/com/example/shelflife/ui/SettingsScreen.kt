@@ -36,11 +36,18 @@ fun SettingsScreen(
     warningDays: Int,
     onShakeChange: (Boolean) -> Unit,
     onWarningDaysChange: (Int) -> Unit,
+    onSaveLocation: (onDone: (Boolean) -> Unit) -> Unit,
     onBack: () -> Unit
 ) {
     var locationMessage by remember { mutableStateOf<String?>(null) }
     val askForLocation = rememberLocationPermission { granted ->
-        locationMessage = if (granted) null else "Without location access, ShelfLife can't save your supermarket."
+        if (granted) {
+            onSaveLocation { saved ->
+                locationMessage = if (saved) "Supermarket saved." else "Couldn't get your location. Check that location is on."
+            }
+        } else {
+            locationMessage = "Without location access, ShelfLife can't save your supermarket."
+        }
     }
     Scaffold(
         topBar = {
