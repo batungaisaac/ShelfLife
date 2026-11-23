@@ -16,6 +16,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.shelflife.data.Supermarket
 import com.example.shelflife.ui.theme.Navy
 import com.example.shelflife.ui.theme.White
 import kotlin.math.roundToInt
@@ -36,7 +38,9 @@ fun SettingsScreen(
     warningDays: Int,
     onShakeChange: (Boolean) -> Unit,
     onWarningDaysChange: (Int) -> Unit,
+    supermarket: Supermarket?,
     onSaveLocation: (onDone: (Boolean) -> Unit) -> Unit,
+    onClearSupermarket: () -> Unit,
     onBack: () -> Unit
 ) {
     var locationMessage by remember { mutableStateOf<String?>(null) }
@@ -81,6 +85,13 @@ fun SettingsScreen(
                 valueRange = 1f..14f,
                 steps = 12
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val place = supermarket?.let { "%.4f, %.4f".format(it.latitude, it.longitude) } ?: "Not set"
+                Text("Supermarket: $place", modifier = Modifier.weight(1f))
+                if (supermarket != null) {
+                    TextButton(onClick = { locationMessage = null; onClearSupermarket() }) { Text("Clear") }
+                }
+            }
             Button(onClick = askForLocation) { Text("Use my current location") }
             locationMessage?.let { Text(it) }
         }

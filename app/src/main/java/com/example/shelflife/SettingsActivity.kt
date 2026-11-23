@@ -32,13 +32,16 @@ class SettingsActivity : ComponentActivity() {
         setContent {
             val shakeEnabled by settings.shakeEnabled.collectAsState(initial = true)
             val warningDays by settings.warningDays.collectAsState(initial = EXPIRING_SOON_DAYS)
+            val supermarket by settings.supermarket.collectAsState(initial = null)
             ShelfLifeTheme {
                 SettingsScreen(
                     shakeEnabled = shakeEnabled,
                     warningDays = warningDays,
                     onShakeChange = { lifecycleScope.launch { settings.setShakeEnabled(it) } },
                     onWarningDaysChange = { lifecycleScope.launch { settings.setWarningDays(it) } },
+                    supermarket = supermarket,
                     onSaveLocation = ::saveCurrentLocation,
+                    onClearSupermarket = { lifecycleScope.launch { settings.clearSupermarket() } },
                     onBack = { finish() }
                 )
             }
